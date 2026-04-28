@@ -1,28 +1,41 @@
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import random
 
+# ================= SECURITY CONFIG =================
 TOKEN = "8764479094:AAEDODY1l2shXrDbA6BYzI9tFy93hAL_rOI"
+ADMIN_ID = 6670244148  
 
+# paid users storage (simple secure runtime memory)
+paid_users = {}
+
+# ================= PLAYERS =================
 players = []
 
-# ---------- MENUS ----------
+# ================= MENUS =================
 def main_menu():
-    return ReplyKeyboardMarkup([["Team", "Set Players"]], resize_keyboard=True)
+    return ReplyKeyboardMarkup(
+        [["🏏 Team", "💎 Buy Access"], ["⚙ Set Players"]],
+        resize_keyboard=True
+    )
 
-def team_menu():
-    return ReplyKeyboardMarkup([
-        ["Batting", "Bowling"],
-        ["Balanced", "Impact"],
-        ["Risky", "GL"],
-        ["Back"]
-    ], resize_keyboard=True)
+def premium_menu():
+    return ReplyKeyboardMarkup(
+        [["🔥 Batting", "🎯 Bowling"],
+         ["⚖ Balanced", "⚡ Impact"],
+         ["💀 Risky", "🏆 GL"],
+         ["🔙 Back"]],
+        resize_keyboard=True
+    )
 
-# ---------- START ----------
+# ================= START =================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("✅ Bot Live!", reply_markup=main_menu())
+    await update.message.reply_text(
+        "✅ Bot Live\n\nFree + Paid system ready",
+        reply_markup=main_menu()
+    )
 
-# ---------- SET PLAYERS ----------
+# ================= SET PLAYERS =================
 async def setplayers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global players
     try:
@@ -33,15 +46,18 @@ async def setplayers(update: Update, context: ContextTypes.DEFAULT_TYPE):
             name, ptype = p.strip().split(":")
             players.append({"name": name, "type": ptype})
 
-        await update.message.reply_text("✅ Players Set!", reply_markup=main_menu())
+        await update.message.reply_text("✅ Players Updated", reply_markup=main_menu())
 
     except:
         await update.message.reply_text("❌ Format:\n/setplayers name:type,name:type")
 
-# ---------- TEAM GENERATORS ----------
+# ================= SECURITY CHECK =================
+def is_paid(user_id):
+    return paid_users.get(user_id, False)
 
-def pick_team(base_players):
-    team = random.sample(base_players, 11)
+# ================= TEAM ENGINE =================
+def build_team():
+    team = random.sample(players, 11)
     c = random.choice(team)
     vc = random.choice([p for p in team if p != c])
 
@@ -52,35 +68,8 @@ def pick_team(base_players):
     text += f"\n👑 C: {c['name']}\n⚡ VC: {vc['name']}"
     return text
 
-def batting_team():
-    bats = [p for p in players if p["type"] == "bat"]
-    if len(bats) < 6:
-        return "❌ Not enough batsmen"
-    return pick_team(bats + players)
-
-def bowling_team():
-    bowls = [p for p in players if p["type"] == "bowl"]
-    if len(bowls) < 6:
-        return "❌ Not enough bowlers"
-    return pick_team(bowls + players)
-
-def balanced_team():
-    if len(players) < 11:
-        return "❌ Set players first"
-    return pick_team(players)
-
-def impact_team():
-    impact = [p for p in players if p["type"] in ["ar", "bowl"]]
-    if len(impact) < 5:
-        return "❌ Not enough impact players"
-    return pick_team(impact + players)
-
-def risky_team():
-    if len(players) < 11:
-        return "❌ Set players first"
-    return pick_team(players)
-
-def gl_teams():
+# ================= PREMIUM ENGINE =================
+def premium_teams():
     if len(players) < 11:
         return "❌ Set players first"
 
@@ -97,43 +86,78 @@ def gl_teams():
 
     return text
 
-# ---------- BUTTON HANDLER ----------
+# ================= COMMAND HANDLERS =================
+async def team(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(build_team(), reply_markup=main_menu())
+
+async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = (
+        "💰 PREMIUM ACCESS\n\n"
+        "₹49 = 20 GL Teams\n\n"
+        "Pay to UPI:\n"
+        "yourupi@upi\n\n"
+        "Payment ke baad screenshot send karo admin ko"
+    )
+    await update.message.reply_text(msg)
+
+# ================= ADMIN APPROVAL =================
+async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.from_user.id != ADMIN_ID:
+        return
+
+    try:
+        user_id = int(context.args[0])
+        paid_users[user_id] = True
+
+        await update.message.reply_text(f"✅ User {user_id} Approved")
+    except:
+        await update.message.reply_text("Usage: /approve user_id")
+
+# ================= BUTTON HANDLER =================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
+    user_id = update.message.from_user.id
 
-    if text == "Team":
-        await update.message.reply_text("Select Type 👇", reply_markup=team_menu())
+    # MAIN MENU
+    if text == "🏏 Team":
+        await update.message.reply_text(build_team(), reply_markup=main_menu())
 
-    elif text == "Back":
+    elif text == "💎 Buy Access":
+        await update.message.reply_text(
+            "💰 Pay ₹49 UPI\nSend screenshot to admin",
+            reply_markup=main_menu()
+        )
+
+    elif text == "⚙ Set Players":
+        await update.message.reply_text("Use:\n/setplayers name:type,name:type")
+
+    # PREMIUM MENU (LOCKED)
+    elif text in ["🔥 Batting","🎯 Bowling","⚖ Balanced","⚡ Impact","💀 Risky","🏆 GL"]:
+
+        if not is_paid(user_id):
+            await update.message.reply_text(
+                "🔒 Locked Feature\n💰 Buy Access first",
+                reply_markup=main_menu()
+            )
+            return
+
+        if text == "🏆 GL":
+            await update.message.reply_text(premium_teams(), reply_markup=premium_menu())
+        else:
+            await update.message.reply_text(build_team(), reply_markup=premium_menu())
+
+    elif text == "🔙 Back":
         await update.message.reply_text("Main Menu", reply_markup=main_menu())
 
-    elif text == "Batting":
-        await update.message.reply_text(batting_team(), reply_markup=team_menu())
-
-    elif text == "Bowling":
-        await update.message.reply_text(bowling_team(), reply_markup=team_menu())
-
-    elif text == "Balanced":
-        await update.message.reply_text(balanced_team(), reply_markup=team_menu())
-
-    elif text == "Impact":
-        await update.message.reply_text(impact_team(), reply_markup=team_menu())
-
-    elif text == "Risky":
-        await update.message.reply_text(risky_team(), reply_markup=team_menu())
-
-    elif text == "GL":
-        await update.message.reply_text(gl_teams(), reply_markup=team_menu())
-
-    elif text == "Set Players":
-        await update.message.reply_text("Send:\n/setplayers name:type,name:type")
-
-# ---------- MAIN ----------
+# ================= MAIN =================
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("setplayers", setplayers))
+app.add_handler(CommandHandler("team", team))
+app.add_handler(CommandHandler("buy", buy))
+app.add_handler(CommandHandler("approve", approve))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
-print("Bot running...")
+print("Bot Running Securely...")
 app.run_polling()
