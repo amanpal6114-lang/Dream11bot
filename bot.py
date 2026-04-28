@@ -40,17 +40,8 @@ def random_team():
             text += f"- {p['name']}\n"
 
         text += f"👑 C: {c['name']}\n⚡ VC: {vc['name']}\n"
-async def teams(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(generate_multiple(10))
+
     return text
-    if len(players) < 11:
-        return None, None, None
-
-    team = random.sample(players, 11)
-    c = random.choice(team)
-    vc = random.choice([p for p in team if p != c])
-    return team, c, vc
-
 def format_team(team, c, vc):
     text = "🏏 TEAM\n\n"
     for p in team:
