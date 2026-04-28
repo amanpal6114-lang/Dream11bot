@@ -63,6 +63,6 @@ app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("setplayers", setplayers))
 app.add_handler(CommandHandler("team", team))
-
+app.add_handler(CommandHandler("teams", teams))
 print("Bot running...")
 app.run_polling()
