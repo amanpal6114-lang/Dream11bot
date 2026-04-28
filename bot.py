@@ -96,7 +96,15 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "⚙ Set Players":
         await update.message.reply_text("Use:\n/setplayers name:type,name:type")
-
+elif text == "📄 Disclaimer":
+    await update.message.reply_text(
+        "⚠️ DISCLAIMER\n\n"
+        "Ye bot fantasy sports insights, analysis aur data-driven suggestions provide karta hai jisse aap apne decisions ko better bana sako.\n\n"
+        "Saari teams aur recommendations statistical patterns, player roles aur match-based analysis par based hoti hain. Lekin fantasy sports ke results real match conditions par depend karte hain aur isme uncertainty hoti hai.\n\n"
+        "Kisi bhi tarah ki guaranteed winning ya fixed result ka claim nahi kiya jata. Users ko apni samajh aur judgment use karke decision lena chahiye.\n\n"
+        "Humara focus aapki selection strategy ko improve karna aur structured analysis ke through better performance ke chances ko enhance karna hai.\n\n"
+        "Is platform ko responsibly aur apne fantasy gaming experience ko support karne ke tool ki tarah use karein."
+    )
     elif text == "💰 Buy":
         await update.message.reply_text(
             "💰 Premium:\n₹49 = 16 Teams\n₹25 = 4-5 Teams\n\nUPI: aman7800@airtel"
