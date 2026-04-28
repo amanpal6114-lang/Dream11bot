@@ -99,7 +99,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "💰 Buy":
         await update.message.reply_text(
-            "💰 Premium:\n₹49 = 16 Teams\n₹25 = 4-5 Teams\n\nUPI: yourupi@upi"
+            "💰 Premium:\n₹49 = 16 Teams\n₹25 = 4-5 Teams\n\nUPI: aman7800@airtel"
         )
 
     # TEAM TYPES
