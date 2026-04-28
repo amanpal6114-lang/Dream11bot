@@ -50,6 +50,8 @@ def format_team(team, c, vc):
     return text
 
 async def team(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def teams(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(generate_multiple(10))
     t, c, vc = random_team()
     if not t:
         await update.message.reply_text("❌ Set players first")
