@@ -25,6 +25,24 @@ async def setplayers(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Format:\n/setplayers name:type,...")
 
 def random_team():
+    def generate_multiple(n):
+    if len(players) < 11:
+        return "❌ Set players first"
+
+    text = ""
+    for i in range(1, n+1):
+        team = random.sample(players, 11)
+        c = random.choice(team)
+        vc = random.choice([p for p in team if p != c])
+
+        text += f"\n🔥 TEAM {i}\n"
+        for p in team:
+            text += f"- {p['name']}\n"
+
+        text += f"👑 C: {c['name']}\n⚡ VC: {vc['name']}\n"
+async def teams(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(generate_multiple(10))
+    return text
     if len(players) < 11:
         return None, None, None
 
