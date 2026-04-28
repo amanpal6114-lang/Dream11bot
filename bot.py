@@ -7,7 +7,7 @@ TOKEN = os.getenv("TOKEN")
 
 players = []
 
-# ------------------ PLAYER SET ------------------
+# ---------------- SET PLAYERS ----------------
 
 async def setplayers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global players
@@ -19,18 +19,15 @@ async def setplayers(update: Update, context: ContextTypes.DEFAULT_TYPE):
             name, ptype = p.strip().split(":")
             players.append({"name": name.strip(), "type": ptype.strip()})
 
-        await update.message.reply_text("✅ Players updated successfully!")
+        await update.message.reply_text("✅ Players updated!")
 
     except:
-        await update.message.reply_text(
-            "❌ Format error!\nUse:\n/setplayers name:type,name:type\nExample:\n/setplayers Jaiswal:bat,Stoinis:ar,Archer:bowl"
-        )
+        await update.message.reply_text("❌ Format error!\nUse:\n/setplayers name:type,name:type")
 
-# ------------------ TEAM FORMAT ------------------
+# ---------------- FORMAT ----------------
 
 def format_team(team, label, c=None, vc=None):
     text = f"🔥 {label} TEAM\n\n"
-
     for p in team:
         text += f"- {p['name']}\n"
 
@@ -39,37 +36,34 @@ def format_team(team, label, c=None, vc=None):
 
     return text
 
-# ------------------ BASE GENERATION ------------------
+# ---------------- BASIC TEAM ----------------
 
 def random_team():
     if len(players) < 11:
-        return None
+        return None, None, None
 
     team = random.sample(players, 11)
     c = random.choice(team)
     vc = random.choice([p for p in team if p != c])
     return team, c, vc
 
-# ------------------ MULTI TEAM ------------------
+# ---------------- MULTIPLE ----------------
 
 def generate_multiple(n):
     if len(players) < 11:
-        return "❌ Set players first using /setplayers"
+        return "❌ Set players first"
 
-    output = "🏏 MATCH TEAMS\n"
-
+    text = ""
     for i in range(1, n+1):
         team, c, vc = random_team()
-        output += f"\n🔥 TEAM {i}\n"
-
+        text += f"\n🔥 TEAM {i}\n"
         for p in team:
-            output += f"- {p['name']}\n"
+            text += f"- {p['name']}\n"
+        text += f"👑 C: {c['name']}\n⚡ VC: {vc['name']}\n"
 
-        output += f"👑 C: {c['name']}\n⚡ VC: {vc['name']}\n"
+    return text
 
-    return output
-
-# ------------------ STRATEGIES ------------------
+# ---------------- STRATEGY ----------------
 
 def batting_team():
     bats = [p for p in players if p["type"] == "bat"]
@@ -84,6 +78,8 @@ def bowling_team():
     return random.sample(bowls, 6) + random.sample(players, 5)
 
 def balanced_team():
+    if len(players) < 11:
+        return None
     return random.sample(players, 11)
 
 def impact_team():
@@ -92,25 +88,16 @@ def impact_team():
         return None
     return random.sample(impact, 5) + random.sample(players, 6)
 
-def risky_team():
-    return random_team()
-
-# ------------------ COMMANDS ------------------
+# ---------------- COMMANDS ----------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "✅ Bot Live!\n\nCommands:\n"
-        "/setplayers name:type,...\n"
-        "/team\n/teams\n/gl\n"
-        "/batting\n/bowling\n/balanced\n/impact\n/risky"
-    )
+    await update.message.reply_text("✅ Bot Live! Use /setplayers first")
 
 async def team(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if len(players) < 11:
+    t, c, vc = random_team()
+    if not t:
         await update.message.reply_text("❌ Set players first")
         return
-
-    t, c, vc = random_team()
     await update.message.reply_text(format_team(t, "Single", c, vc))
 
 async def teams(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -124,17 +111,20 @@ async def batting(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not t:
         await update.message.reply_text("❌ Not enough batsmen")
         return
-    await update.message.reply_text(format_team(t, "Batting Heavy"))
+    await update.message.reply_text(format_team(t, "Batting"))
 
 async def bowling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     t = bowling_team()
     if not t:
         await update.message.reply_text("❌ Not enough bowlers")
         return
-    await update.message.reply_text(format_team(t, "Bowling Heavy"))
+    await update.message.reply_text(format_team(t, "Bowling"))
 
 async def balanced(update: Update, context: ContextTypes.DEFAULT_TYPE):
     t = balanced_team()
+    if not t:
+        await update.message.reply_text("❌ Set players first")
+        return
     await update.message.reply_text(format_team(t, "Balanced"))
 
 async def impact(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -144,11 +134,7 @@ async def impact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text(format_team(t, "Impact"))
 
-async def risky(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    t, c, vc = risky_team()
-    await update.message.reply_text(format_team(t, "Risky", c, vc))
-
-# ------------------ MAIN ------------------
+# ---------------- MAIN ----------------
 
 app = ApplicationBuilder().token(TOKEN).build()
 
@@ -161,7 +147,6 @@ app.add_handler(CommandHandler("batting", batting))
 app.add_handler(CommandHandler("bowling", bowling))
 app.add_handler(CommandHandler("balanced", balanced))
 app.add_handler(CommandHandler("impact", impact))
-app.add_handler(CommandHandler("risky", risky))
 
-print("✅ Bot running...")
+print("Bot running...")
 app.run_polling()
