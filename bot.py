@@ -99,11 +99,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 elif text == "📄 Disclaimer":
     await update.message.reply_text(
         "⚠️ DISCLAIMER\n\n"
-        "Ye bot fantasy sports insights, analysis aur data-driven suggestions provide karta hai jisse aap apne decisions ko better bana sako.\n\n"
-        "Saari teams aur recommendations statistical patterns, player roles aur match-based analysis par based hoti hain. Lekin fantasy sports ke results real match conditions par depend karte hain aur isme uncertainty hoti hai.\n\n"
+        "Ye bot AI sports insights, analysis aur data-driven suggestions provide karta hai jisse aap apne decisions ko better bana sako.\n\n"
+        "Ye bot pitch report, venue, player form, aur previous data se team suggest krta hai, logical reasioning se risky team banata hai.\n\n"
         "Kisi bhi tarah ki guaranteed winning ya fixed result ka claim nahi kiya jata. Users ko apni samajh aur judgment use karke decision lena chahiye.\n\n"
         "Humara focus aapki selection strategy ko improve karna aur structured analysis ke through better performance ke chances ko enhance karna hai.\n\n"
-        "Is platform ko responsibly aur apne fantasy gaming experience ko support karne ke tool ki tarah use karein."
+        "Ye bot kisi bhi fantasy app ko promote nhi karta hai."
     )
     elif text == "💰 Buy":
         await update.message.reply_text(
